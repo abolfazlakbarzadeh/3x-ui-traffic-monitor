@@ -148,12 +148,14 @@ npm install
 npm run dev
 ```
 
-Docker image builds the Vite app into the FastAPI static dir. If PyPI is flaky during image build:
+Docker image builds the Vite app into the FastAPI static dir. If PyPI is flaky during image build, pre-download wheels (optional):
 
 ```bash
-cd backend && pip download -r requirements.txt -d wheels
+pip download -r backend/requirements.txt -d backend/wheels
 docker compose build --no-cache
 ```
+
+An empty `backend/wheels/` directory is enough for a normal online build.
 
 ---
 

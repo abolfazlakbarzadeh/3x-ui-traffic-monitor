@@ -17,11 +17,15 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONPATH=/app/backend \
     PIP_DEFAULT_TIMEOUT=120
 
-# Prefer offline wheelhouse (copied from host) to survive flaky PyPI.
+# Install deps from PyPI. Optional: populate backend/wheels for offline/flaky networks:
+#   pip download -r backend/requirements.txt -d backend/wheels
 COPY backend/requirements.txt /app/backend/requirements.txt
 COPY backend/wheels /app/backend/wheels
-RUN pip install --no-cache-dir --no-index --find-links=/app/backend/wheels -r /app/backend/requirements.txt \
-    || pip install --no-cache-dir -r /app/backend/requirements.txt
+RUN if ls /app/backend/wheels/*.whl >/dev/null 2>&1; then \
+      pip install --no-cache-dir --no-index --find-links=/app/backend/wheels -r /app/backend/requirements.txt; \
+    else \
+      pip install --no-cache-dir -r /app/backend/requirements.txt; \
+    fi
 
 COPY backend/app /app/backend/app
 COPY backend/alembic /app/backend/alembic
