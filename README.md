@@ -38,7 +38,7 @@
 **Requirements:** Docker + Docker Compose.
 
 ```bash
-git clone https://github.com/<your-username>/3x-ui-traffic-monitor.git
+git clone https://github.com/abolfazlakbarzadeh/3x-ui-traffic-monitor.git
 cd 3x-ui-traffic-monitor
 
 cp .env.example .env
