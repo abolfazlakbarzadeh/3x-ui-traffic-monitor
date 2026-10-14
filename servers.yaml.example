@@ -1,0 +1,8 @@
+- name: panel-1
+  base_url: https://example.com:2053
+  web_base_path: /abc123/
+  verify_tls: true
+  source_mode: api
+  auth:
+    type: token
+    token: REPLACE_WITH_ADMIN_SCOPE_TOKEN

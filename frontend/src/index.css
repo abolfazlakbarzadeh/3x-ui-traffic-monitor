@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ink: #0f1c18;
+  --mist: #e7f0ec;
+  --leaf: #1f6f54;
+  --clay: #c45c26;
+  --line: #c5d4cc;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--ink);
+  font-family: "IBM Plex Sans", Segoe UI, sans-serif;
+  background:
+    radial-gradient(1200px 600px at 10% -10%, #d7ebe2 0%, transparent 55%),
+    radial-gradient(900px 500px at 100% 0%, #f3e2d4 0%, transparent 50%),
+    linear-gradient(180deg, #f7fbf9 0%, #eef4f1 100%);
+}
+
+#root {
+  min-height: 100vh;
+}
