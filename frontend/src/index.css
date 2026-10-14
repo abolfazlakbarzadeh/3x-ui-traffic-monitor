@@ -3,24 +3,220 @@
 @tailwind utilities;
 
 :root {
-  --ink: #0f1c18;
-  --mist: #e7f0ec;
-  --leaf: #1f6f54;
-  --clay: #c45c26;
-  --line: #c5d4cc;
+  --sider: #001529;
+  --sider-hover: #000c17;
+  --primary: #1677ff;
+  --primary-hover: #4096ff;
+  --primary-soft: #e6f4ff;
+  --panel-bg: #f0f2f5;
+  --card: #ffffff;
+  --header-bg: #ffffff;
+  --text: #262626;
+  --muted: #8c8c8c;
+  --border: #f0f0f0;
+  --input-border: #d9d9d9;
+  --soft-bg: #fafafa;
+  --segment-bg: rgba(0, 0, 0, 0.04);
+  --success: #52c41a;
+  --warning: #faad14;
+  --danger: #ff4d4f;
+  --shadow-card: 0 1px 2px 0 rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02),
+    0 2px 4px 0 rgba(0, 0, 0, 0.02);
+  --shadow-popup: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12);
+}
+
+html.dark {
+  --sider: #141414;
+  --sider-hover: #000000;
+  --primary: #1668dc;
+  --primary-hover: #3c89e8;
+  --primary-soft: rgba(22, 104, 220, 0.18);
+  --panel-bg: #141414;
+  --card: #1f1f1f;
+  --header-bg: #1f1f1f;
+  --text: rgba(255, 255, 255, 0.85);
+  --muted: rgba(255, 255, 255, 0.45);
+  --border: #303030;
+  --input-border: #424242;
+  --soft-bg: #141414;
+  --segment-bg: rgba(255, 255, 255, 0.08);
+  --success: #49aa19;
+  --warning: #d89614;
+  --danger: #dc4446;
+  --shadow-card: 0 1px 2px 0 rgba(0, 0, 0, 0.35);
+  --shadow-popup: 0 6px 16px 0 rgba(0, 0, 0, 0.45);
 }
 
 body {
   margin: 0;
   min-height: 100vh;
-  color: var(--ink);
-  font-family: "IBM Plex Sans", Segoe UI, sans-serif;
-  background:
-    radial-gradient(1200px 600px at 10% -10%, #d7ebe2 0%, transparent 55%),
-    radial-gradient(900px 500px at 100% 0%, #f3e2d4 0%, transparent 50%),
-    linear-gradient(180deg, #f7fbf9 0%, #eef4f1 100%);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: var(--panel-bg);
+  -webkit-font-smoothing: antialiased;
 }
 
 #root {
   min-height: 100vh;
+}
+
+@layer components {
+  .xui-card {
+    @apply rounded-ant border border-panel-border bg-panel-card shadow-card;
+  }
+
+  .xui-btn {
+    @apply inline-flex h-8 items-center justify-center gap-1.5 rounded-md border border-transparent
+      px-3 text-sm font-normal transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .xui-btn-primary {
+    @apply xui-btn bg-primary text-white hover:bg-primary-hover;
+  }
+
+  .xui-btn-default {
+    @apply xui-btn border-panel-line bg-panel-card text-panel-text hover:border-primary hover:text-primary;
+  }
+
+  .xui-input {
+    @apply h-8 rounded-md border border-panel-line bg-panel-card px-3 text-sm text-panel-text
+      outline-none transition-colors placeholder:text-panel-muted
+      hover:border-primary focus:border-primary focus:shadow-[0_0_0_2px_rgba(22,119,255,0.2)];
+  }
+
+  .xui-select {
+    @apply xui-input appearance-none pr-8;
+  }
+
+  .xui-segment {
+    @apply inline-flex rounded-md p-0.5;
+    background: var(--segment-bg);
+  }
+
+  .xui-segment-item {
+    @apply rounded px-3 py-1 text-sm text-panel-muted transition-all;
+  }
+
+  .xui-segment-item.is-active {
+    @apply bg-panel-card font-medium text-panel-text shadow-sm;
+  }
+
+  .xui-tag {
+    @apply inline-flex items-center rounded-sm px-1.5 py-0.5 text-xs;
+  }
+
+  .xui-table-wrap {
+    @apply overflow-x-auto rounded-ant border border-panel-border bg-panel-card;
+  }
+
+  .xui-table {
+    @apply min-w-full text-left text-sm;
+  }
+
+  .xui-table thead {
+    @apply bg-panel-soft text-panel-text;
+  }
+
+  .xui-table th {
+    @apply border-b border-panel-border px-4 py-3 font-medium;
+  }
+
+  .xui-table td {
+    @apply border-b border-panel-border px-4 py-3 align-middle;
+  }
+
+  .xui-table tbody tr:hover {
+    @apply bg-panel-soft;
+  }
+
+  .xui-page-title {
+    @apply text-xl font-semibold text-panel-text;
+  }
+
+  .xui-page-desc {
+    @apply mt-1 text-sm text-panel-muted;
+  }
+}
+
+.login-scene {
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+  /* Light mode: soft cool gray → blue wash (not the navy “always-dark” look) */
+  background: linear-gradient(145deg, #eef3f9 0%, #e8eef6 40%, #dce8f6 100%);
+}
+
+html.dark .login-scene {
+  background: linear-gradient(145deg, #0a0a0a 0%, #141414 45%, #1a1a1a 100%);
+}
+
+.login-scene::before,
+.login-scene::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.35;
+  animation: drift 18s ease-in-out infinite alternate;
+}
+
+html.dark .login-scene::before,
+html.dark .login-scene::after {
+  opacity: 0.55;
+}
+
+.login-scene::before {
+  width: 420px;
+  height: 420px;
+  top: -80px;
+  left: -60px;
+  background: #1677ff;
+}
+
+.login-scene::after {
+  width: 380px;
+  height: 380px;
+  right: -40px;
+  bottom: -60px;
+  background: #13c2c2;
+  animation-delay: -6s;
+}
+
+.login-blob {
+  position: absolute;
+  width: 280px;
+  height: 280px;
+  top: 40%;
+  left: 45%;
+  border-radius: 50%;
+  background: #69b1ff;
+  filter: blur(70px);
+  opacity: 0.28;
+  animation: drift 22s ease-in-out infinite alternate-reverse;
+}
+
+html.dark .login-blob {
+  background: #722ed1;
+  opacity: 0.35;
+}
+
+@keyframes drift {
+  from {
+    transform: translate(0, 0) scale(1);
+  }
+  to {
+    transform: translate(40px, -30px) scale(1.12);
+  }
+}
+
+.sider-link {
+  @apply flex items-center gap-3 rounded-md px-3 py-2.5 text-sm text-white/65 transition-colors;
+}
+
+.sider-link:hover {
+  @apply bg-white/10 text-white;
+}
+
+.sider-link.is-active {
+  @apply bg-primary text-white;
 }

@@ -67,6 +67,15 @@ class Settings(BaseSettings):
     jwt_secret_file: str | None = None
     admin_password_file: str | None = None
 
+    # Panel bind / TLS (env bootstrap; SQLite overrides via Settings UI)
+    panel_settings_db: str = "/config/panel.db"
+    web_listen: str = ""
+    web_domain: str = ""
+    web_port: int = 8000
+    web_cert_file: str = ""
+    web_key_file: str = ""
+    web_base_path: str = "/"
+
     def resolved_jwt_secret(self) -> str:
         return _read_secret_file(self.jwt_secret_file) or self.jwt_secret
 

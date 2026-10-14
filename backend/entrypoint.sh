@@ -1,8 +1,8 @@
 #!/bin/sh
 set -e
 cd /app/backend
+
 python - <<'PY'
-import asyncio
 from alembic import command
 from alembic.config import Config
 from app.config import get_settings
@@ -14,4 +14,5 @@ try:
 except Exception as exc:
     print(f"alembic upgrade warning: {exc}; falling back to create_all")
 PY
-exec uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+exec python -m app.run_server

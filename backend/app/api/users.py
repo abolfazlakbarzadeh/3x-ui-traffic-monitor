@@ -74,12 +74,17 @@ async def list_users(
         .subquery()
     )
 
+    # Sort/filter expressions must use raw byte totals (not display units).
+    used_bytes = (ClientCurrent.up + ClientCurrent.down).label("used_bytes")
+    usage_today_bytes = func.coalesce(today_sq.c.usage_today, 0).label("usage_today_bytes")
+    usage_month_bytes = func.coalesce(month_sq.c.usage_month, 0).label("usage_month_bytes")
+
     stmt: Select = (
         select(
             ClientCurrent,
             Server.name,
-            func.coalesce(today_sq.c.usage_today, 0),
-            func.coalesce(month_sq.c.usage_month, 0),
+            usage_today_bytes,
+            usage_month_bytes,
             online_sq.c.email.is_not(None),
         )
         .join(Server, Server.id == ClientCurrent.server_id)
@@ -108,15 +113,22 @@ async def list_users(
         "email": ClientCurrent.email,
         "up": ClientCurrent.up,
         "down": ClientCurrent.down,
-        "used": (ClientCurrent.up + ClientCurrent.down),
+        "used": used_bytes,
         "total": ClientCurrent.total,
         "expiry": ClientCurrent.expiry_time,
         "last_online": ClientCurrent.last_online,
-        "usage_today": today_sq.c.usage_today,
-        "usage_month": month_sq.c.usage_month,
+        "usage_today": usage_today_bytes,
+        "usage_month": usage_month_bytes,
     }
     sort_col = sort_map.get(sort, ClientCurrent.email)
-    stmt = stmt.order_by(sort_col.desc() if order.lower() == "desc" else sort_col.asc())
+    descending = order.lower() == "desc"
+    # nulls_last so missing usage sorts as 0-ish rather than "winning" ASC/DESC oddly
+    ordered = sort_col.desc() if descending else sort_col.asc()
+    try:
+        ordered = ordered.nulls_last()
+    except AttributeError:
+        pass
+    stmt = stmt.order_by(ordered, ClientCurrent.email.asc())
 
     count_stmt = select(func.count()).select_from(stmt.order_by(None).subquery())
     total = int(await db.scalar(count_stmt) or 0)

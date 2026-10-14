@@ -1,4 +1,10 @@
 .env
+servers.yaml
+config/servers.yaml
+config/panel.db
+config/certs/
+*.pem
+*.key
 __pycache__/
 *.py[cod]
 .venv/
@@ -13,3 +19,4 @@ frontend/dist/
 *.egg-info/
 .DS_Store
 .remember/
+.codegraph/

@@ -40,6 +40,17 @@ async def test_login_and_me(monkeypatch):
         assert me.status_code == 200
         assert me.json()["username"] == "admin"
 
+        csrf = login.json()["csrf_token"]
+        denied = await client.post("/api/auth/logout")
+        assert denied.status_code == 403
+        still = await client.get("/api/auth/me")
+        assert still.status_code == 200
+
+        out = await client.post("/api/auth/logout", headers={"X-CSRF-Token": csrf})
+        assert out.status_code == 200
+        gone = await client.get("/api/auth/me")
+        assert gone.status_code == 401
+
 
 def test_write_endpoints_not_in_source_module():
     from pathlib import Path

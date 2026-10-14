@@ -1,8 +1,10 @@
-- name: panel-1
-  base_url: https://example.com:2053
-  web_base_path: /abc123/
+# Copy to config/servers.yaml (or set XUI_SERVERS as JSON in .env).
+# Use an admin-scope API token from 3x-ui → Settings → Security → API Token.
+- name: main
+  base_url: https://panel.example.com:2053
+  web_base_path: /your-secret-path/
   verify_tls: true
   source_mode: api
   auth:
     type: token
-    token: REPLACE_WITH_ADMIN_SCOPE_TOKEN
+    token: YOUR_ADMIN_SCOPE_TOKEN

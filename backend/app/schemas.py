@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, computed_field
 
 
 class LoginRequest(BaseModel):
@@ -15,12 +15,23 @@ class ServerOut(BaseModel):
     id: int
     name: str
     base_url: str
+    web_base_path: str = "/"
     source_mode: str
     last_poll_at: datetime | None
     last_poll_ok: bool | None
     last_error: str | None
 
     model_config = {"from_attributes": True}
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def panel_url(self) -> str:
+        path = self.web_base_path or "/"
+        if path != "/" and not path.startswith("/"):
+            path = "/" + path
+        if path != "/" and not path.endswith("/"):
+            path = path + "/"
+        return self.base_url.rstrip("/") + ("" if path == "/" else path)
 
 
 class UserOut(BaseModel):

@@ -41,20 +41,17 @@ export default function UsersPage() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="text-xl font-semibold">Users</h2>
-          <p className="text-sm text-ink/60">Server-side search, sort, and pagination.</p>
+          <h1 className="xui-page-title">Clients</h1>
+          <p className="xui-page-desc">Search, sort, and export traffic usage across panels.</p>
         </div>
-        <a
-          className="border border-line bg-white/70 px-3 py-2 text-sm hover:border-leaf"
-          href={api.exportUrl(params)}
-        >
+        <a className="xui-btn-default" href={api.exportUrl(params)}>
           Export CSV
         </a>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="xui-card flex flex-wrap gap-2 p-3">
         <input
-          className="min-w-[12rem] flex-1 border border-line bg-white/70 px-3 py-2 text-sm"
+          className="xui-input min-w-[14rem] flex-1"
           placeholder="Search email…"
           value={search}
           onChange={(e) => {
@@ -63,7 +60,7 @@ export default function UsersPage() {
           }}
         />
         <select
-          className="border border-line bg-white/70 px-3 py-2 text-sm"
+          className="xui-input"
           value={server}
           onChange={(e) => {
             setPage(1);
@@ -79,9 +76,9 @@ export default function UsersPage() {
         </select>
       </div>
 
-      <div className="overflow-x-auto border border-line bg-white/60">
-        <table className="min-w-full text-left text-sm">
-          <thead className="border-b border-line bg-mist/50 font-medium">
+      <div className="xui-table-wrap">
+        <table className="xui-table">
+          <thead>
             <tr>
               {[
                 ["email", "Email"],
@@ -91,61 +88,71 @@ export default function UsersPage() {
                 ["usage_month", "Month"],
                 ["expiry", "Expiry"],
               ].map(([key, label]) => (
-                <th key={key} className="cursor-pointer px-3 py-2" onClick={() => toggleSort(key)}>
+                <th
+                  key={key}
+                  className="cursor-pointer select-none hover:text-primary"
+                  onClick={() => toggleSort(key)}
+                >
                   {label}
                   {sort === key ? (order === "asc" ? " ↑" : " ↓") : ""}
                 </th>
               ))}
-              <th className="px-3 py-2">Online</th>
+              <th>Online</th>
             </tr>
           </thead>
           <tbody>
             {(users.data?.items ?? []).map((u) => {
               const pct = u.total > 0 ? Math.min(100, (u.used / u.total) * 100) : 0;
               const bar =
-                u.total === 0 ? "bg-leaf/40" : pct >= 100 ? "bg-clay" : pct >= 80 ? "bg-amber-500" : "bg-leaf";
+                u.total === 0
+                  ? "bg-primary/40"
+                  : pct >= 100
+                    ? "bg-danger"
+                    : pct >= 80
+                      ? "bg-warning"
+                      : "bg-success";
               const badge = expiryBadge(u.expiry_time, u.days_left);
+              const badgeClass =
+                badge.tone === "bad"
+                  ? "bg-danger/10 text-danger"
+                  : badge.tone === "warn"
+                    ? "bg-warning/10 text-[#d48806]"
+                    : badge.tone === "delay"
+                      ? "bg-primary-soft text-primary"
+                      : "bg-[rgba(0,0,0,0.04)] text-panel-muted";
               return (
-                <tr key={`${u.server_id}-${u.email}`} className="border-b border-line/70">
-                  <td className="px-3 py-2">
+                <tr key={`${u.server_id}-${u.email}`}>
+                  <td>
                     <Link
-                      className="font-medium text-leaf hover:underline"
+                      className="font-medium text-primary hover:text-primary-hover"
                       to={`/users/${u.server_id}/${encodeURIComponent(u.email)}`}
                     >
                       {u.email}
                     </Link>
-                    <div className="font-mono text-xs text-ink/45">{u.server_name}</div>
+                    <div className="text-xs text-panel-muted">{u.server_name}</div>
                   </td>
-                  <td className="px-3 py-2 font-mono text-xs">
+                  <td className="font-mono text-xs" title={`${u.used.toLocaleString()} bytes`}>
                     {formatBytes(u.used)}
-                    <div className="mt-1 h-1.5 w-28 overflow-hidden bg-line/60">
-                      <div className={`h-full ${bar}`} style={{ width: `${u.total ? pct : 8}%` }} />
+                    <div className="mt-1.5 h-1.5 w-28 overflow-hidden rounded-full bg-[rgba(0,0,0,0.06)]">
+                      <div className={`h-full rounded-full ${bar}`} style={{ width: `${u.total ? pct : 8}%` }} />
                     </div>
                   </td>
-                  <td className="px-3 py-2 font-mono text-xs">
+                  <td className="font-mono text-xs" title={u.total ? `${u.total.toLocaleString()} bytes` : "unlimited"}>
                     {u.total === 0 ? "∞" : formatBytes(u.total)}
                   </td>
-                  <td className="px-3 py-2 font-mono text-xs">{formatBytes(u.usage_today)}</td>
-                  <td className="px-3 py-2 font-mono text-xs">{formatBytes(u.usage_month)}</td>
-                  <td className="px-3 py-2">
-                    <span
-                      className={`text-xs ${
-                        badge.tone === "bad"
-                          ? "text-clay"
-                          : badge.tone === "warn"
-                            ? "text-amber-700"
-                            : badge.tone === "delay"
-                              ? "text-leaf"
-                              : "text-ink/60"
-                      }`}
-                    >
-                      {badge.label}
-                    </span>
+                  <td className="font-mono text-xs" title={`${u.usage_today.toLocaleString()} bytes`}>
+                    {formatBytes(u.usage_today)}
                   </td>
-                  <td className="px-3 py-2">
+                  <td className="font-mono text-xs" title={`${u.usage_month.toLocaleString()} bytes`}>
+                    {formatBytes(u.usage_month)}
+                  </td>
+                  <td>
+                    <span className={`xui-tag ${badgeClass}`}>{badge.label}</span>
+                  </td>
+                  <td>
                     <span
                       className={`inline-block h-2.5 w-2.5 rounded-full ${
-                        u.online ? "bg-leaf" : "bg-line"
+                        u.online ? "bg-success shadow-[0_0_0_3px_rgba(82,196,26,0.2)]" : "bg-[#d9d9d9]"
                       }`}
                       title={u.online ? "online" : "offline"}
                     />
@@ -153,23 +160,34 @@ export default function UsersPage() {
                 </tr>
               );
             })}
+            {!users.data?.items.length && (
+              <tr>
+                <td colSpan={7} className="py-10 text-center text-panel-muted">
+                  No clients found
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
 
       <div className="flex items-center justify-between text-sm">
-        <span className="text-ink/50">{users.data?.total ?? 0} users</span>
-        <div className="flex gap-2">
+        <span className="text-panel-muted">{users.data?.total ?? 0} clients</span>
+        <div className="flex items-center gap-2">
           <button
-            className="border border-line px-3 py-1 disabled:opacity-40"
+            type="button"
+            className="xui-btn-default"
             disabled={page <= 1}
             onClick={() => setPage((p) => p - 1)}
           >
             Prev
           </button>
-          <span className="px-2 py-1 font-mono text-xs">p{page}</span>
+          <span className="rounded-md bg-white px-2.5 py-1 font-mono text-xs text-panel-muted shadow-sm">
+            {page}
+          </span>
           <button
-            className="border border-line px-3 py-1 disabled:opacity-40"
+            type="button"
+            className="xui-btn-default"
             disabled={(users.data?.items.length ?? 0) < 50}
             onClick={() => setPage((p) => p + 1)}
           >

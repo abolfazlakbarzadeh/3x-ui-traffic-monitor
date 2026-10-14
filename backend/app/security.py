@@ -26,7 +26,6 @@ class AuthUser:
 
 
 _login_attempts: dict[str, list[float]] = defaultdict(list)
-_csrf_tokens: dict[str, str] = {}
 
 
 def hash_password(password: str) -> str:
@@ -81,13 +80,16 @@ def decode_token(token: str, settings: Settings) -> AuthUser:
 
 
 def issue_csrf() -> str:
-    token = secrets.token_urlsafe(32)
-    _csrf_tokens[token] = token
-    return token
+    return secrets.token_urlsafe(32)
 
 
-def validate_csrf(token: str | None) -> None:
-    if not token or token not in _csrf_tokens:
+def validate_csrf(*, header_token: str | None, cookie_token: str | None) -> None:
+    """Double-submit cookie check — works across process restarts (no memory store)."""
+    if (
+        not header_token
+        or not cookie_token
+        or not secrets.compare_digest(header_token, cookie_token)
+    ):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="CSRF validation failed")
 
 
@@ -134,5 +136,7 @@ async def require_admin(user: Annotated[AuthUser, Depends(get_current_user)]) ->
 def require_csrf(request: Request) -> None:
     if request.method in {"GET", "HEAD", "OPTIONS"}:
         return
-    token = request.headers.get("X-CSRF-Token")
-    validate_csrf(token)
+    validate_csrf(
+        header_token=request.headers.get("X-CSRF-Token"),
+        cookie_token=request.cookies.get("csrf_token"),
+    )

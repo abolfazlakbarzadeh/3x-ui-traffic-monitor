@@ -20,15 +20,22 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    restart: unless-stopped
     ports:
-      - "8000:8000"
+      # Publish the same port the panel binds (change both sides if you change web_port).
+      - "${WEB_PORT:-8000}:${WEB_PORT:-8000}"
     env_file:
       - .env
     environment:
       DATABASE_URL: postgresql+asyncpg://xui:xui@db:5432/xui_monitor
       STATIC_DIR: /app/frontend/dist
+      SERVERS_YAML: /config/servers.yaml
+      PANEL_SETTINGS_DB: /config/panel.db
+      WEB_PORT: ${WEB_PORT:-8000}
+    volumes:
+      - "./config:/config"
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz')"]
+      test: ["CMD", "python", "-m", "app.healthcheck"]
       interval: 10s
       timeout: 5s
       retries: 10
