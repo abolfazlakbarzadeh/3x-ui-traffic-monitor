@@ -75,10 +75,18 @@ Back up the Postgres volume (`pgdata`) regularly. The monitor DB is independent 
 
 ```bash
 # backend
-cd backend && pip install -e ".[dev]" && pytest -v
+cd backend && python3 -m venv .venv && source .venv/bin/activate
+pip install -e ".[dev]" && pytest -v
 
 # frontend
 cd frontend && npm install && npm run dev
+```
+
+If Docker builds fail downloading from PyPI, refresh a local wheelhouse first:
+
+```bash
+cd backend && pip download -r requirements.txt -d wheels
+docker compose build --no-cache
 ```
 
 ## Stack

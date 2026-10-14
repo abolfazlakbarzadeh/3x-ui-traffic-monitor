@@ -2,7 +2,7 @@
 
 FROM node:22-alpine AS frontend-build
 WORKDIR /frontend
-COPY frontend/package.json ./
+COPY frontend/package.json frontend/package-lock.json* ./
 RUN npm install
 COPY frontend/ ./
 RUN npm run build
@@ -12,18 +12,24 @@ RUN useradd --create-home --uid 10001 appuser \
     && apt-get update && apt-get install -y --no-install-recommends curl \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
-ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app/backend \
+    PIP_DEFAULT_TIMEOUT=120
 
-COPY backend/pyproject.toml /app/backend/pyproject.toml
+# Prefer offline wheelhouse (copied from host) to survive flaky PyPI.
+COPY backend/requirements.txt /app/backend/requirements.txt
+COPY backend/wheels /app/backend/wheels
+RUN pip install --no-cache-dir --no-index --find-links=/app/backend/wheels -r /app/backend/requirements.txt \
+    || pip install --no-cache-dir -r /app/backend/requirements.txt
+
 COPY backend/app /app/backend/app
 COPY backend/alembic /app/backend/alembic
 COPY backend/alembic.ini /app/backend/alembic.ini
-RUN pip install --no-cache-dir /app/backend \
-    && pip install --no-cache-dir "uvicorn[standard]>=0.32.0"
-
-COPY --from=frontend-build /frontend/dist /app/frontend/dist
 COPY backend/entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
+
+COPY --from=frontend-build /frontend/dist /app/frontend/dist
 
 USER appuser
 WORKDIR /app/backend
